@@ -57,7 +57,6 @@ public class PlayerMove : MonoBehaviour
         //중력500배
         yVelocity = yVelocity + gravity * Time.deltaTime;
         dir.y = yVelocity;
-        print(yVelocity);
         //만약 점프 중이었다면 점프 전 상태로 초기화 하고 싶다.
         //이동
         //transform.position += dir * speed * Time.deltaTime;
