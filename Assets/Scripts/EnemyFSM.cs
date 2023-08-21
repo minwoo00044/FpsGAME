@@ -11,6 +11,9 @@ using UnityEngine;
 
 //목표3 : 적의 상태가 Move일 때, 플레이어와의 거리가 공격범위 밖이면 적이 플레이어를 따라간다.
 //필요속성3: 이동 속도, 적의 이동을 위한 캐릭터 컨트롤러
+
+//목표4 : 플레이어가 공격 범위 내에 들어왔으면 특정시간마다 때린다.
+//필요 속성 : 현재시간, 특정시간
 public class EnemyFSM : MonoBehaviour
 {
     enum EnemyState
@@ -30,6 +33,9 @@ public class EnemyFSM : MonoBehaviour
     public float moveSpeed;
     CharacterController characterController;
     public float attackDist = 2f;
+    //필요 속성 : 현재시간, 특정시간
+    float currentTime;
+    public float attackTime = 2f;
 
 
     // Start is called before the first frame update
@@ -76,10 +82,26 @@ public class EnemyFSM : MonoBehaviour
     private void Return()
     {
     }
-
+    //목표4 : 플레이어가 공격 범위 내에 들어왔으면 때린다.
     private void Attack()
     {
-
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        if (distanceToPlayer < attackDist)
+        {
+            //특정시간마다 때린다.
+            currentTime += Time.deltaTime;
+            if(currentTime >= attackTime)
+            {
+                print("공격!");
+                currentTime = 0;
+            }
+        }
+        else
+        {
+            //공격 범위로 들어오면 공격상태로 전환
+            enemyState = EnemyState.Move;
+            print("상태전환 : Attack to Move");
+        }
     }
     //목표3 : 적의 상태가 Move일 때, 플레이어와의 거리가 공격범위 밖이면 적이 플레이어를 따라간다.
     private void Move()
