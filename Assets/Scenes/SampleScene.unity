@@ -209,7 +209,7 @@ GameObject:
   - component: {fileID: 339180067}
   - component: {fileID: 339180066}
   - component: {fileID: 339180070}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -320,8 +320,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   findDistance: 10
-  moveSpeed: 1
+  moveSpeed: 3
   attackDist: 2
+  attackTime: 1
+  attckPower: 1
+  moveDist: 20
+  hp: 3
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -956,6 +960,10 @@ PrefabInstance:
       propertyPath: hitEffect
       value: 
       objectReference: {fileID: 158435669}
+    - target: {fileID: 7669180367395039923, guid: 010611e267fc35a4dbf4177fcc4df395, type: 3}
+      propertyPath: weaponPower
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7669180367395039923, guid: 010611e267fc35a4dbf4177fcc4df395, type: 3}
       propertyPath: firePosition
       value: 

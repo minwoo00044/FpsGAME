@@ -1,6 +1,7 @@
-using System;
+
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 
 //목표 : 적을 FSM 다이어그램에 따라 동작시키고 싶다.
@@ -14,6 +15,12 @@ using UnityEngine;
 
 //목표4 : 플레이어가 공격 범위 내에 들어왔으면 특정시간마다 때린다.
 //필요 속성 : 현재시간, 특정시간
+//목표5: 플레이어를 따라가다가 초기 위치에서 일정 거리를 벗어나면 초기 위치로 돌아온다.
+//필요 속성: 초기위치, 이동가능 범위
+//목표6 : 초기위치로 돌아간다. 특정 거리 이내면 idle 상태로 전환.
+//필요 속성 : 특정 거리
+//목표7. 플레이어의 공격을 받으면 hitDamage만큼 에너미의 hp를 감소 시킨다.
+
 public class EnemyFSM : MonoBehaviour
 {
     enum EnemyState
@@ -36,14 +43,20 @@ public class EnemyFSM : MonoBehaviour
     //필요 속성 : 현재시간, 특정시간
     float currentTime;
     public float attackTime = 2f;
-
-
+    public int attckPower = 1;
+    //필요 속성: 초기위치, 이동가능 범위
+    Vector3 originPos;
+    public float moveDist = 20f;
+    //필요 속성 : 특정 거리
+    float returnDist = 0.3f;
+    public int hp = 3;
     // Start is called before the first frame update
     void Start()
     {
         enemyState = EnemyState.Idle;
         player = GameObject.Find("Player").transform;
         characterController = gameObject.GetComponent<CharacterController>();
+        originPos = transform.position;
     }
     // Update is called once per frame
     void Update()
@@ -63,24 +76,74 @@ public class EnemyFSM : MonoBehaviour
                 Return();
                 break;
             case EnemyState.Damaged:
-                Damaged();
+                //Damaged();
                 break;
             case EnemyState.Die:
-                Die();
+               // Die();
                 break;
         }
     }
 
     private void Die()
     {
+        StopAllCoroutines();
+        StartCoroutine(DieProcesee());
+    }
+    IEnumerator DieProcesee()
+    {
+        yield return new WaitForSeconds(2f);
+        print("사망");
+        Destroy(gameObject);
+    }
+    public void DamageAction(int damage)
+    {
+        //만약, 이미 에너미가 피격, 사망상태라면 데미지 ㄴㄴ
+        if (enemyState == EnemyState.Damaged || enemyState == EnemyState.Die)
+            return;
+        hp -= damage;
+        if(hp > 0)
+        {
+            enemyState = EnemyState.Damaged;
+            print("상태전환 : AnyState to Damaged");
+            Damaged();
+        }
+        else
+        {
+            enemyState = EnemyState.Damaged;
+            print("상태전환 : AnyState to Die");
+            Die();
+        }
     }
 
     private void Damaged()
     {
-    }
+        //피격 모션 0.5초 간
 
+        StartCoroutine(DamageProcess());
+    }
+    IEnumerator DamageProcess()
+    {
+        //피격 모션 시간만큼 기다린다.
+        yield return new WaitForSeconds(0.5f);
+
+        enemyState = EnemyState.Move;
+        print("상태전환 : Damaged to Move");
+
+    }
+    //목표6 : 초기위치로 돌아간다. 특정 거리 이내면 idle 상태로 전환.
     private void Return()
     {
+        float distanceToOringPos = (originPos - transform.position).magnitude;
+        if(distanceToOringPos > returnDist)
+        {
+            Vector3 dir = (originPos - transform.position).normalized;
+            characterController.Move(dir * moveSpeed * Time.deltaTime);
+        }
+        else 
+        {
+            enemyState = EnemyState.Idle;
+            print("상태전환 : Return to Idle");
+        }
     }
     //목표4 : 플레이어가 공격 범위 내에 들어왔으면 때린다.
     private void Attack()
@@ -92,6 +155,7 @@ public class EnemyFSM : MonoBehaviour
             currentTime += Time.deltaTime;
             if(currentTime >= attackTime)
             {
+                player.gameObject.GetComponent<PlayerMove>().DamageAction(attckPower);
                 print("공격!");
                 currentTime = 0;
             }
@@ -107,7 +171,13 @@ public class EnemyFSM : MonoBehaviour
     private void Move()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        if (distanceToPlayer > attackDist)
+        float distanceToOringPos = (originPos - transform.position).magnitude;
+        if(distanceToOringPos > moveDist)
+        {
+            enemyState = EnemyState.Return;
+            print("상태전환 : Move to Return");
+        }
+        else if (distanceToPlayer > attackDist)
         {
             Vector3 dir = (player.position - transform.position).normalized;
             //플레이어를 따라간다.
@@ -117,6 +187,7 @@ public class EnemyFSM : MonoBehaviour
         {
             //공격 범위로 들어오면 공격상태로 전환
             enemyState = EnemyState.Attack;
+            currentTime = attackTime;
             print("상태전환 : Move to Attack");
         }
     }
@@ -133,4 +204,5 @@ public class EnemyFSM : MonoBehaviour
             print("상태전환 : Idle to Move");
         }
     }
+
 }
