@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 //목적 : wasd를 누르면 캐릭터를 그 방향으로 이동시키고 싶다.
 //필요속성 : 이동속도
@@ -16,6 +17,11 @@ using UnityEngine;
 //그리고
 // 목적4 : 플레이어가 피격 당하면 hp 를 damage 만큼 깎는다.
 //필요 속성 : hp
+// 현재 플레이어의 hp(%)를 hp슬라이더에 적용한다.
+//필요속성 : hp, maxhp, slider
+//목적5: 공격을 당했을 때 hitImage를 켰다가 꺼준다.
+//필요속성: hitImage 게임오브젝트
+
 public class PlayerMove : MonoBehaviour
 {
     public float speed = 10f;
@@ -25,9 +31,16 @@ public class PlayerMove : MonoBehaviour
     float yVelocity = 0;
     public bool isJumping = false;
     public int hp = 10;
+    int maxHp = 10;
+    public Slider hpSlider;
+
+    public GameObject hitImage;
+    float currentTime;
+    public float hitImageEndTime;
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
+        maxHp = hp;
     }
     // Update is called once per frame
     void Update()
@@ -65,10 +78,46 @@ public class PlayerMove : MonoBehaviour
         //transform.position += dir * speed * Time.deltaTime;
         //2-2. 캐릭터 컨트롤러로 나를 이동시키고 싶다.
         characterController.Move(dir * speed * Time.deltaTime);
+        // 현재 플레이어의 hp(%)를 hp슬라이더에 적용한다.
+        hpSlider.value = (float)hp / maxHp;
     }
 
     public void DamageAction(int damage)
     {
         hp -= damage;
+        //목적5: 공격을 당했을 때 hitImage를 켰다가 꺼준다.
+        if(hp > 0)
+        {
+            StartCoroutine(PlayHitEffect());
+        }
+        else if(hp <= 0)
+        {
+            StartCoroutine(PlayDieEffect());
+        }
+    }
+    IEnumerator PlayHitEffect()
+    {
+        hitImage.SetActive(true);
+        yield return new WaitForSeconds(0.1f);
+        hitImage.SetActive(false);
+    }
+    IEnumerator PlayDieEffect() 
+    {
+        hitImage.SetActive(true);
+        Color color = hitImage.GetComponent<Image>().color;
+        while (true) 
+        {
+            currentTime += Time.deltaTime;
+            yield return null;
+            color.a = Mathf.Lerp(0, 1, currentTime / hitImageEndTime);
+            hitImage.GetComponent<Image>().color = color;
+
+            if (currentTime >= hitImageEndTime)
+            {
+                currentTime = 0;
+                break;
+            }
+        }
+        
     }
 }

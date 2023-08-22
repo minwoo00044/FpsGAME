@@ -1,9 +1,7 @@
-
 using System.Collections;
 using System.Collections.Generic;
-
 using UnityEngine;
-
+using UnityEngine.UI;
 //목표 : 적을 FSM 다이어그램에 따라 동작시키고 싶다.
 //필요속성 : 적 상태
 
@@ -50,6 +48,8 @@ public class EnemyFSM : MonoBehaviour
     //필요 속성 : 특정 거리
     float returnDist = 0.3f;
     public int hp = 3;
+    int maxHp = 3;
+    public Slider hpSlider;
     // Start is called before the first frame update
     void Start()
     {
@@ -57,6 +57,7 @@ public class EnemyFSM : MonoBehaviour
         player = GameObject.Find("Player").transform;
         characterController = gameObject.GetComponent<CharacterController>();
         originPos = transform.position;
+        maxHp = hp;
     }
     // Update is called once per frame
     void Update()
@@ -82,8 +83,8 @@ public class EnemyFSM : MonoBehaviour
                // Die();
                 break;
         }
+        hpSlider.value = (float)hp / maxHp;
     }
-
     private void Die()
     {
         StopAllCoroutines();
@@ -155,7 +156,8 @@ public class EnemyFSM : MonoBehaviour
             currentTime += Time.deltaTime;
             if(currentTime >= attackTime)
             {
-                player.gameObject.GetComponent<PlayerMove>().DamageAction(attckPower);
+                if(player.gameObject.GetComponent<PlayerMove>().hp > 0)
+                    player.gameObject.GetComponent<PlayerMove>().DamageAction(attckPower);
                 print("공격!");
                 currentTime = 0;
             }
