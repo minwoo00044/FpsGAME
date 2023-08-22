@@ -45,8 +45,10 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        hpSlider.value = (float)hp / maxHp;
         //입력
-
+        if (GameManager.Instance.gameState != GameManager.GameState.Start )
+            return;
         if (isJumping && characterController.collisionFlags == CollisionFlags.Below)
         {
             isJumping = false;
@@ -79,7 +81,7 @@ public class PlayerMove : MonoBehaviour
         //2-2. 캐릭터 컨트롤러로 나를 이동시키고 싶다.
         characterController.Move(dir * speed * Time.deltaTime);
         // 현재 플레이어의 hp(%)를 hp슬라이더에 적용한다.
-        hpSlider.value = (float)hp / maxHp;
+
     }
 
     public void DamageAction(int damage)
@@ -118,6 +120,5 @@ public class PlayerMove : MonoBehaviour
                 break;
             }
         }
-        
     }
 }

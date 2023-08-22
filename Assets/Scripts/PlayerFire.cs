@@ -42,7 +42,9 @@ public class PlayerFire : MonoBehaviour
     
     void Update()
     {
-        if(Input.GetMouseButtonDown(1))
+        if (GameManager.Instance.gameState != GameManager.GameState.Start)
+            return;
+        if (Input.GetMouseButtonDown(1))
         {
             GameObject instance = Instantiate(bomb);
             instance.transform.position = firePosition.transform.position;
