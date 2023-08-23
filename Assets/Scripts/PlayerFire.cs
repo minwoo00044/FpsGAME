@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 //우클릭으로 폭탄을 특정 방향으로 발4
 //필요한거 폭탄, 발사위치, 방향
 //순서 1 마우스 우클릭
@@ -12,6 +13,10 @@ using UnityEngine;
 //2-4 레이를 발사하고, 부딪힌 물체가 있으면 그 위치에 피격 효과를 만든다.
 //필요속성 : 피격효과 게임오브젝트, 이펙트의 파티클 시스템.
 //목표3 : 레이가 부딪힌 대상이 에너미라면 데미지를 주겠다.
+//목적4 : 이동 블랜드 트리의 파라메터 값이 0일 때 Attack Trigger를 시전하겠다.
+//필요속성 : 자식 오브젝트의 애니메이터
+//목적5 : 특정 키 입력으로 무기모드 전환
+//필요 속성: 무기모드 열거형 변수, 줌 확인 변수
 public class PlayerFire : MonoBehaviour
 {
     public GameObject bomb;
@@ -22,10 +27,20 @@ public class PlayerFire : MonoBehaviour
     public GameObject hitEffect;
     ParticleSystem particleSystem0;
     public int weaponPower = 2;
-
+    Animator animator;
+    public enum WeaponMode
+    {
+        Noraml,
+        Sniper
+    }
+    public WeaponMode weaponMode = WeaponMode.Noraml;
+    bool isZoomMode = false;
+    public TMP_Text WeaponModeText;
     private void Start()
     {
         particleSystem0 = hitEffect.GetComponent<ParticleSystem>();
+        animator = GetComponentInChildren<Animator>();
+        WeaponModeText.text = weaponMode.ToString() + "MODE";
         //int x = 3;
         //int y = 4;
         //Swap(ref x, ref y);
@@ -39,20 +54,46 @@ public class PlayerFire : MonoBehaviour
         //quotint = Divide(a, b, out remainder);
         //print(string.Format("몫: {0}, 나머지: {1}", quotint, remainder));
     }
-    
+
     void Update()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+
         if (GameManager.Instance.gameState != GameManager.GameState.Start)
             return;
         if (Input.GetMouseButtonDown(1))
         {
-            GameObject instance = Instantiate(bomb);
-            instance.transform.position = firePosition.transform.position;
-            Rigidbody rb = instance.GetComponent<Rigidbody>();
-            rb.AddForce(Camera.main.transform.forward * power, ForceMode.Impulse);
+            switch (weaponMode)
+            {
+                //노멀모드 일때는 오른쪽 버튼 누르면 수류탄 발사
+                case WeaponMode.Noraml:
+                    GameObject instance = Instantiate(bomb);
+                    instance.transform.position = firePosition.transform.position;
+                    Rigidbody rb = instance.GetComponent<Rigidbody>();
+                    rb.AddForce(Camera.main.transform.forward * power, ForceMode.Impulse);
+                    break;
+                //스나이퍼 모드 : 마우스 오른쪽 버튼을 누르면 줌인
+                case WeaponMode.Sniper:
+                    if(!isZoomMode)
+                    {
+                        Camera.main.fieldOfView = 15;
+                        isZoomMode = true;
+                    }
+                    else
+                    {
+                        Camera.main.fieldOfView = 60;
+                        isZoomMode = false;
+                    }
+                    break;
+            }
+
         }
         if (Input.GetMouseButtonDown(0))
         {
+            if (animator.GetFloat("MoveMotion") == 0)
+            {
+                animator.SetTrigger("Attack");
+            }
             Ray ray = new Ray(Camera.main.transform.position, Camera.main.transform.forward);
             RaycastHit hitInfo = new RaycastHit();
             if (Physics.Raycast(ray, out hitInfo))
@@ -71,6 +112,19 @@ public class PlayerFire : MonoBehaviour
                 }
 
             }
+        }
+        //키보드 숫자 1번 누르면, 무기 모드를 노말모드로
+        if(Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            weaponMode = WeaponMode.Noraml;
+            Camera.main.fieldOfView = 60f;
+            WeaponModeText.text = weaponMode.ToString() + "MODE";
+        }
+        //키보드 숫자 2번 누르면, 무기 모드를 저격모드로
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            weaponMode = WeaponMode.Sniper;
+            WeaponModeText.text = weaponMode.ToString() + "MODE";
         }
     }
 

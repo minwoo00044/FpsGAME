@@ -21,7 +21,8 @@ using UnityEngine.UI;
 //필요속성 : hp, maxhp, slider
 //목적5: 공격을 당했을 때 hitImage를 켰다가 꺼준다.
 //필요속성: hitImage 게임오브젝트
-
+//목적 : 플레이어의 자식 중 모델링 오브젝트에 있는 애니메이터 컴포넌트를 가져와서 블랜딩 트리를 호출하고 싶다.
+//필요 속성: 모델링 오브젝트의 애니메이터
 public class PlayerMove : MonoBehaviour
 {
     public float speed = 10f;
@@ -37,9 +38,12 @@ public class PlayerMove : MonoBehaviour
     public GameObject hitImage;
     float currentTime;
     public float hitImageEndTime;
+    //필요 속성: 모델링 오브젝트의 애니메이터
+    Animator animator;
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
+        animator = gameObject.GetComponentInChildren<Animator>();
         maxHp = hp;
     }
     // Update is called once per frame
@@ -47,12 +51,12 @@ public class PlayerMove : MonoBehaviour
     {
         hpSlider.value = (float)hp / maxHp;
         //입력
-        if (GameManager.Instance.gameState != GameManager.GameState.Start )
+        if (GameManager.Instance.gameState != GameManager.GameState.Start)
             return;
         if (isJumping && characterController.collisionFlags == CollisionFlags.Below)
         {
             isJumping = false;
-            
+
         }
         //바닥에 닿아있을때 수직 속도 초기화
         else if (characterController.collisionFlags == CollisionFlags.Below)
@@ -81,18 +85,18 @@ public class PlayerMove : MonoBehaviour
         //2-2. 캐릭터 컨트롤러로 나를 이동시키고 싶다.
         characterController.Move(dir * speed * Time.deltaTime);
         // 현재 플레이어의 hp(%)를 hp슬라이더에 적용한다.
-
+        animator.SetFloat("MoveMotion", dir.magnitude);
     }
 
     public void DamageAction(int damage)
     {
         hp -= damage;
         //목적5: 공격을 당했을 때 hitImage를 켰다가 꺼준다.
-        if(hp > 0)
+        if (hp > 0)
         {
             StartCoroutine(PlayHitEffect());
         }
-        else if(hp <= 0)
+        else if (hp <= 0)
         {
             StartCoroutine(PlayDieEffect());
         }
@@ -103,11 +107,11 @@ public class PlayerMove : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         hitImage.SetActive(false);
     }
-    IEnumerator PlayDieEffect() 
+    IEnumerator PlayDieEffect()
     {
         hitImage.SetActive(true);
         Color color = hitImage.GetComponent<Image>().color;
-        while (true) 
+        while (true)
         {
             currentTime += Time.deltaTime;
             yield return null;
