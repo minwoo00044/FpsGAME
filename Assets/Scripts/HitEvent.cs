@@ -8,6 +8,6 @@ public class HitEvent : MonoBehaviour
 
     public void HitPlayer()
     {
-        fsm.AttackAction();
+        //fsm.AttackAction();
     }
 }

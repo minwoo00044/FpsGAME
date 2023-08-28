@@ -23,6 +23,7 @@ using UnityEngine.UI;
 //필요 속성: 애니메이터
 //목표 : 네비게이션 에이전트의 최소 거리를 입력해 주고, 플레이어를 따라갈 수 있도록 한다. 
 //필요속성 : 네비게이션 에이전트
+//먹표 : enemy의 초기 속도를 agent의 적용
 public class EnemyFSM : MonoBehaviour
 {
     enum EnemyState
@@ -202,10 +203,7 @@ public class EnemyFSM : MonoBehaviour
             animator.SetTrigger("Attack2Move");
         }
     }
-    public void AttackAction()
-    {
 
-    }
     //목표3 : 적의 상태가 Move일 때, 플레이어와의 거리가 공격범위 밖이면 적이 플레이어를 따라간다.
     private void Move()
     {
@@ -223,7 +221,12 @@ public class EnemyFSM : MonoBehaviour
             ////플레이어를 따라간다.
             //characterController.Move(dir * moveSpeed * Time.deltaTime);
             //transform.forward = dir;
-
+            if(navMeshAgent.isOnOffMeshLink)
+            {
+                object nevMeshOwner = navMeshAgent.navMeshOwner;
+                GameObject navMeshGO = (navMeshAgent as Component).gameObject;
+                print("이동" + navMeshGO.name);
+            }
             //이동을 멈추고 경로를 초기화한다.
             navMeshAgent.isStopped = true;
             navMeshAgent.ResetPath();

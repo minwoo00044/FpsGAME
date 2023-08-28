@@ -17,6 +17,7 @@ using TMPro;
 //필요속성 : 자식 오브젝트의 애니메이터
 //목적5 : 특정 키 입력으로 무기모드 전환
 //필요 속성: 무기모드 열거형 변수, 줌 확인 변수
+//목적6 : 총을 발사할 때 빵야빵야
 public class PlayerFire : MonoBehaviour
 {
     public GameObject bomb;
@@ -36,6 +37,7 @@ public class PlayerFire : MonoBehaviour
     public WeaponMode weaponMode = WeaponMode.Noraml;
     bool isZoomMode = false;
     public TMP_Text WeaponModeText;
+    public GameObject[] fireFlashEffs;
     private void Start()
     {
         particleSystem0 = hitEffect.GetComponent<ParticleSystem>();
@@ -112,6 +114,8 @@ public class PlayerFire : MonoBehaviour
                 }
 
             }
+            //총구 이펙트 실행
+            StartCoroutine(ShootEffOn(0.05f));
         }
         //키보드 숫자 1번 누르면, 무기 모드를 노말모드로
         if(Input.GetKeyDown(KeyCode.Alpha1))
@@ -126,6 +130,17 @@ public class PlayerFire : MonoBehaviour
             weaponMode = WeaponMode.Sniper;
             WeaponModeText.text = weaponMode.ToString() + "MODE";
         }
+    }
+
+    IEnumerator ShootEffOn(float duration)
+    {
+        int randNum = Random.Range(0, fireFlashEffs.Length - 1);
+        fireFlashEffs[randNum].SetActive(true);
+
+        yield return new WaitForSeconds(duration);
+
+        fireFlashEffs[randNum].SetActive(false);
+
     }
 
     //public void Swap(ref int a, ref int b)
