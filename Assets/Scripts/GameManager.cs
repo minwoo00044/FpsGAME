@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEngine.SceneManagement;
 
 //목적: 게임의 상태를 구별하고, 게임의 시작과 끝을 TextUI로 표현하고 싶다.
 //필요속성 : 게임상태 열거형 변수, TextUI
@@ -11,6 +13,8 @@ using TMPro;
 //필요속성: playerMove
 //목적5 : 플레이어의 hp가 0 이하면 애님 멈춘다.
 //필요 속성: 플레이어의 애니메이터 컴포넌트
+//목적6 : Setting 버튼 누르면 option ui 켜짐
+//필요속성 : Optionui 게임오브젝트, 일시정지
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
@@ -19,6 +23,7 @@ public class GameManager : MonoBehaviour
     {
         Ready,
         Start,
+        Pause,
         GameOver
     }
 
@@ -26,6 +31,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text gameStateText;
     public PlayerMove playerMove;
     Animator animator;
+    public GameObject optionUI;
     // Start is called before the first frame update
     private void Awake()
     {
@@ -62,6 +68,11 @@ public class GameManager : MonoBehaviour
             gameStateText.gameObject.SetActive(true);
             gameStateText.text = "Game Over";
             gameStateText.color = new Color32(255, 255, 255, 255);
+            GameObject retryBtn = gameStateText.transform.GetChild(0).gameObject;
+            GameObject quitBtn = gameStateText.transform.GetChild(1).gameObject;
+            retryBtn.SetActive(true);
+            quitBtn.SetActive(true);
+            playerMove.hpSlider.gameObject.SetActive(false);
             gameState = GameState.GameOver;
         }
     }
@@ -69,5 +80,26 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         CheckGameOver();
+    }
+    public void OpenOptionWindow()
+    {
+        optionUI.SetActive(true);
+        Time.timeScale = 0f;
+        gameState = GameState.Pause;
+    }
+    public void CloseOptionWindow()
+    {
+        optionUI.SetActive(false);
+        Time.timeScale = 1f;
+        gameState = GameState.Start;
+    }
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

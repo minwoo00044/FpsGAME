@@ -59,7 +59,7 @@ public class PlayerFire : MonoBehaviour
 
     void Update()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
 
         if (GameManager.Instance.gameState != GameManager.GameState.Start)
             return;
