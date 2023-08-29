@@ -38,6 +38,12 @@ public class PlayerFire : MonoBehaviour
     bool isZoomMode = false;
     public TMP_Text WeaponModeText;
     public GameObject[] fireFlashEffs;
+
+    public GameObject crossHair0;
+    public GameObject crossHair1;
+    public GameObject rifleImage0;
+    public GameObject rifleImage1;
+    public GameObject granadeImage;
     private void Start()
     {
         particleSystem0 = hitEffect.GetComponent<ParticleSystem>();
@@ -79,10 +85,15 @@ public class PlayerFire : MonoBehaviour
                     if(!isZoomMode)
                     {
                         Camera.main.fieldOfView = 15;
+                        crossHair0.SetActive(false);
+                        crossHair1.SetActive(true);
                         isZoomMode = true;
                     }
                     else
                     {
+
+                        crossHair0.SetActive(true);
+                        crossHair1.SetActive(false);
                         Camera.main.fieldOfView = 60;
                         isZoomMode = false;
                     }
@@ -123,12 +134,23 @@ public class PlayerFire : MonoBehaviour
             weaponMode = WeaponMode.Noraml;
             Camera.main.fieldOfView = 60f;
             WeaponModeText.text = weaponMode.ToString() + "MODE";
+
+            crossHair0.SetActive(true);
+            crossHair1.SetActive(false);
+            rifleImage0.SetActive(true);
+            rifleImage1.SetActive(false);
+            granadeImage.SetActive(true);
         }
         //키보드 숫자 2번 누르면, 무기 모드를 저격모드로
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             weaponMode = WeaponMode.Sniper;
             WeaponModeText.text = weaponMode.ToString() + "MODE";
+
+
+            rifleImage0.SetActive(false);
+            rifleImage1.SetActive(true);
+            granadeImage.SetActive(false);
         }
     }
 
